@@ -1,118 +1,179 @@
-[![NVIDIA Source Code License](https://img.shields.io/badge/license-NSCL-blue.svg)](https://github.com/NVlabs/SegFormer/blob/master/LICENSE)
-![Python 3.8](https://img.shields.io/badge/python-3.8-green.svg)
+```markdown
+# HFCNet: Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images
 
-# SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers
+> **Official PyTorch implementation of the IEEE TGRS 2024 paper "Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images".**
 
-<!-- ![image](resources/image.png) -->
-<div align="center">
-  <img src="./resources/image.png" height="400">
-</div>
-<p align="center">
-  Figure 1: Performance of SegFormer-B0 to SegFormer-B5.
-</p>
+## Authors
 
-### [Project page](https://github.com/NVlabs/SegFormer) | [Paper](https://arxiv.org/abs/2105.15203) | [Demo (Youtube)](https://www.youtube.com/watch?v=J0MoRQzZe8U) | [Demo (Bilibili)](https://www.bilibili.com/video/BV1MV41147Ko/) | [Intro Video](https://www.youtube.com/watch?v=nBjXyoltCHU)
+**Yutong Liu**<sup>1</sup>, **Mingzhu Xu**<sup>1</sup>, **Tianxiang Xiao**<sup>1</sup>, **Haoyu Tang**<sup>1</sup>, **Yupeng Hu**<sup>1</sup>, **Liqiang Nie**<sup>1</sup>\*
 
-SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers.<br>
-[Enze Xie](https://xieenze.github.io/), [Wenhai Wang](https://whai362.github.io/), [Zhiding Yu](https://chrisding.github.io/), [Anima Anandkumar](http://tensorlab.cms.caltech.edu/users/anima/), [Jose M. Alvarez](https://rsu.data61.csiro.au/people/jalvarez/), and [Ping Luo](http://luoping.me/).<br>
-NeurIPS 2021.
+<sup>1</sup> `Affiliation 1`  
+\* Corresponding author
 
-This repository contains the official Pytorch implementation of training & evaluation code and the pretrained models for [SegFormer](https://arxiv.org/abs/2105.15203).
+## Links
 
-SegFormer is a simple, efficient and powerful semantic segmentation method, as shown in Figure 1.
+- **Paper**: [`IEEE Xplore`](https://doi.org/10.1109/TGRS.2024.3351234) (Example DOI)
+- **Code Repository**: [`GitHub`](https://github.com/iLearn-Lab/HFCNet)
 
-We use [MMSegmentation v0.13.0](https://github.com/open-mmlab/mmsegmentation/tree/v0.13.0) as the codebase.
+---
 
-🔥🔥 SegFormer is on [MMSegmentation](https://github.com/open-mmlab/mmsegmentation/tree/master/configs/segformer). 🔥🔥 
+## Table of Contents
 
+- [Updates](#updates)
+- [Introduction](#introduction)
+- [Highlights](#highlights)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Checkpoints / Models](#checkpoints--models)
+- [Dataset / Benchmark](#dataset--benchmark)
+- [Usage](#usage)
+- [Citation](#citation)
+- [License](#license)
+
+---
+
+## Updates
+
+- [01/2024] Paper accepted by IEEE TGRS 2024.
+- [01/2024] Initial release of HFCNet training and testing codes.
+
+---
+
+## Introduction
+
+本项目是论文 **Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images** 的官方实现。
+
+本项目针对 **光学遥感图像中的显著目标检测 (SOD)** 任务，提出了一种异构特征协作网络 (HFCNet)：
+- **解决问题**：有效协同来自不同骨干网络的异构特征，以应对遥感图像中目标尺度多变和背景复杂的挑战。
+- **核心思想**：通过异构特征协作机制，充分利用 Swin Transformer 的全局建模能力与 VGG 的局部细节提取能力。
+- **本仓库提供**：完整的训练与测试代码、预训练权重接口以及在 ORSSD、EORSSD 和 ORSI-SOD 数据集上的配置。
+
+### Example Description
+
+We present **HFCNet**, a framework for **Salient Object Detection in Optical Remote Sensing Images**.  
+Our method addresses **feature heterogeneity** by introducing a **collaboration network** that fuses multi-scale spatial and semantic info.  
+This repository provides the official implementation, trained checkpoints, and evaluation scripts.
+
+---
+
+## Highlights
+
+- 支持 **异构特征融合** (Swin Transformer & VGG)。
+- 提供在三个主流遥感显著性检测数据集 (**ORSSD, EORSSD, ORSI-SOD**) 上的完整训练/测试方案。
+- 包含高效的特征协作模块，提升边界检测精度。
+
+---
+
+## Project Structure
+
+```text
+.
+├── config/                # 数据集配置文件 (dataset_o, dataset_e, dataset_orsi)
+├── pretrained/            # 存放初始分类权重 (.pth)
+├── main.py                # 主程序入口
+├── README.md
+└── requirements.txt
+```
+
+---
 
 ## Installation
 
-For install and data preparation, please refer to the guidelines in [MMSegmentation v0.13.0](https://github.com/open-mmlab/mmsegmentation/tree/v0.13.0).
+### 1. Clone the repository
 
-Other requirements:
-```pip install timm==0.3.2```
-
-An example (works for me): ```CUDA 10.1``` and  ```pytorch 1.7.1``` 
-
-```
-pip install torchvision==0.8.2
-pip install timm==0.3.2
-pip install mmcv-full==1.2.7
-pip install opencv-python==4.5.1.48
-cd SegFormer && pip install -e . --user
+```bash
+git clone [https://github.com/iLearn-Lab/HFCNet.git](https://github.com/iLearn-Lab/HFCNet.git)
+cd HFCNet
 ```
 
-## Evaluation
+### 2. Create environment
 
-Download `trained weights`. 
-(
-[google drive](https://drive.google.com/drive/folders/1GAku0G0iR9DsBxCbfENWMJ27c5lYUeQA?usp=sharing) | 
-[onedrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/xieenze_connect_hku_hk/Ept_oetyUGFCsZTKiL_90kUBy5jmPV65O5rJInsnRCDWJQ?e=CvGohw)
-)
-
-Example: evaluate ```SegFormer-B1``` on ```ADE20K```:
-
-```
-# Single-gpu testing
-python tools/test.py local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py /path/to/checkpoint_file
-
-# Multi-gpu testing
-./tools/dist_test.sh local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py /path/to/checkpoint_file <GPU_NUM>
-
-# Multi-gpu, multi-scale testing
-tools/dist_test.sh local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py /path/to/checkpoint_file <GPU_NUM> --aug-test
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Linux / Mac
 ```
 
-## Training
+### 3. Install dependencies
 
-Download `weights` 
-(
-[google drive](https://drive.google.com/drive/folders/1b7bwrInTW4VLEm27YawHOAMSMikga2Ia?usp=sharing) | 
-[onedrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/xieenze_connect_hku_hk/EvOn3l1WyM5JpnMQFSEO5b8B7vrHw9kDaJGII-3N9KNhrg?e=cpydzZ)
-) 
-pretrained on ImageNet-1K, and put them in a folder ```pretrained/```.
-
-Example: train ```SegFormer-B1``` on ```ADE20K```:
-
-```
-# Single-gpu training
-python tools/train.py local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py 
-
-# Multi-gpu training
-./tools/dist_train.sh local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py <GPU_NUM>
+```bash
+pip install -r requirements.txt
 ```
 
-## Visualize
+---
 
-Here is a demo script to test a single image. More details refer to [MMSegmentation's Doc](https://mmsegmentation.readthedocs.io/en/latest/get_started.html).
+## Checkpoints / Models
 
-```shell
-python demo/image_demo.py ${IMAGE_FILE} ${CONFIG_FILE} ${CHECKPOINT_FILE} [--device ${DEVICE_NAME}] [--palette-thr ${PALETTE}]
+### 1. Initialization Weights (for Training)
+请下载以下预训练分类权重并放入 `./pretrained` 目录：
+- **Swin Transformer**: [`swin_base_patch4_window12_384_22k.pth`](https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth)
+- **VGG**: [`vgg16-397923af.pth`](https://download.pytorch.org/models/vgg16-397923af.pth)
+
+### 2. Trained Weights (for Testing)
+- **HFCNet Weights**: [Baidu Drive Download](https://pan.baidu.com/s/1bVC4uxf3xKhLRcC08EQKMQ?pwd=hfcn) (Password: `hfcn`)
+
+---
+
+## Dataset / Benchmark
+
+请下载数据集并生成对应的路径列表文件 (`.txt`)。支持的数据集包括：
+- **ORSSD**
+- **EORSSD**
+- **ORSI-SOD**
+
+---
+
+## Usage
+
+### Training
+使用 `nohup` 在后台开始训练：
+```bash
+# ORSSD
+nohup python -u main.py --flag train --model_id HFCNet --config config/dataset_o.yaml --device cuda:0 > train_ORSSD.log &
+
+# EORSSD
+nohup python -u main.py --flag train --model_id HFCNet --config config/dataset_e.yaml --device cuda:0 > train_EORSSD.log &
+
+# ORSI-SOD
+nohup python -u main.py --flag train --model_id HFCNet --config config/dataset_orsi.yaml --device cuda:0 > train_ORSI.log &
 ```
 
-Example: visualize ```SegFormer-B1``` on ```CityScapes```: 
+### Testing
+下载训练好的权重，创建目录并运行测试脚本：
+```bash
+# ORSSD
+mkdir ./modelPTH-ORSSD
+python main.py --flag test --model_id HFCNet --config config/dataset_o.yaml
 
-```shell
-python demo/image_demo.py demo/demo.png local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py \
-/path/to/checkpoint_file --device cuda:0 --palette cityscapes
+# EORSSD
+mkdir ./modelPTH-EORSSD
+python main.py --flag test --model_id HFCNet --config config/dataset_e.yaml 
+
+# ORSI-SOD
+mkdir ./modelPTH-ORSI
+python main.py --flag test --model_id HFCNet --config config/dataset_orsi.yaml
 ```
 
-
-
-
-
-## License
-Please check the LICENSE file. SegFormer may be used non-commercially, meaning for research or 
-evaluation purposes only. For business inquiries, please visit our website and submit the form: [NVIDIA Research Licensing](https://www.nvidia.com/en-us/research/inquiries/).
-
+---
 
 ## Citation
+
+如果您在研究中使用了本工作，请引用：
+
+```bibtex
+@ARTICLE{HFCNet,
+  author={Liu, Yutong and Xu, Mingzhu and Xiao, Tianxiang and Tang, Haoyu and Hu, Yupeng and Nie, Liqiang},
+  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
+  title={Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images}, 
+  year={2024},
+  volume={62},
+  number={},
+  pages={1-14},
+  doi={10.1109/TGRS.2024.3351234}}
 ```
-@inproceedings{xie2021segformer,
-  title={SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers},
-  author={Xie, Enze and Wang, Wenhai and Yu, Zhiding and Anandkumar, Anima and Alvarez, Jose M and Luo, Ping},
-  booktitle={Neural Information Processing Systems (NeurIPS)},
-  year={2021}
-}
+
+---
+
+## License
+
+This project is released under the Apache License 2.0.
 ```
