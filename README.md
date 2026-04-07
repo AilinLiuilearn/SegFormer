@@ -1,118 +1,189 @@
-[![NVIDIA Source Code License](https://img.shields.io/badge/license-NSCL-blue.svg)](https://github.com/NVlabs/SegFormer/blob/master/LICENSE)
-![Python 3.8](https://img.shields.io/badge/python-3.8-green.svg)
+```markdown
+# Superpixel Segmentation With Edge Guided Local-Global Attention Network
 
-# SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers
+> **Official PyTorch implementation of the TCSVT paper "Superpixel Segmentation With Edge Guided Local-Global Attention Network".**
 
-<!-- ![image](resources/image.png) -->
-<div align="center">
-  <img src="./resources/image.png" height="400">
-</div>
-<p align="center">
-  Figure 1: Performance of SegFormer-B0 to SegFormer-B5.
-</p>
+## Authors
 
-### [Project page](https://github.com/NVlabs/SegFormer) | [Paper](https://arxiv.org/abs/2105.15203) | [Demo (Youtube)](https://www.youtube.com/watch?v=J0MoRQzZe8U) | [Demo (Bilibili)](https://www.bilibili.com/video/BV1MV41147Ko/) | [Intro Video](https://www.youtube.com/watch?v=nBjXyoltCHU)
+**Mingzhu Xu**<sup>1</sup>, **Zhengyu Sun**<sup>1</sup>, **Yijun Hu**<sup>1</sup>, **Haoyu Tang**<sup>1</sup>, **Yupeng Hu**<sup>1</sup>, **Xuemeng Song**<sup>2</sup>, **Liqiang Nie**<sup>2</sup>
 
-SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers.<br>
-[Enze Xie](https://xieenze.github.io/), [Wenhai Wang](https://whai362.github.io/), [Zhiding Yu](https://chrisding.github.io/), [Anima Anandkumar](http://tensorlab.cms.caltech.edu/users/anima/), [Jose M. Alvarez](https://rsu.data61.csiro.au/people/jalvarez/), and [Ping Luo](http://luoping.me/).<br>
-NeurIPS 2021.
+<sup>1</sup> `Affiliation 1`  
+<sup>2</sup> `Affiliation 2`  
+\* Corresponding author
 
-This repository contains the official Pytorch implementation of training & evaluation code and the pretrained models for [SegFormer](https://arxiv.org/abs/2105.15203).
+## Links
 
-SegFormer is a simple, efficient and powerful semantic segmentation method, as shown in Figure 1.
+- **Paper**: [`IEEE Xplore`](https://doi.org/10.1109/TCSVT.2025.3587485)
+- **Code Repository**: [`GitHub`](https://github.com/iLearn-Lab/ELGANet)
 
-We use [MMSegmentation v0.13.0](https://github.com/open-mmlab/mmsegmentation/tree/v0.13.0) as the codebase.
+---
 
-🔥🔥 SegFormer is on [MMSegmentation](https://github.com/open-mmlab/mmsegmentation/tree/master/configs/segformer). 🔥🔥 
+## Table of Contents
 
+- [Updates](#updates)
+- [Introduction](#introduction)
+- [Highlights](#highlights)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Data Preparation](#data-preparation)
+- [Usage](#usage)
+- [Evaluation](#evaluation)
+- [Demo / Visualization](#demo--visualization)
+- [Citation](#citation)
+- [License](#license)
+
+---
+
+## Updates
+
+- [04/2026] Initial release of the official implementation.
+- [01/2025] Paper published in IEEE TCSVT.
+
+---
+
+## Introduction
+
+本项目是论文 **"Superpixel Segmentation With Edge Guided Local-Global Attention Network" (ELGANet)** 的官方实现。
+
+超像素分割是计算机视觉中的基础任务。ELGANet 通过引入边缘引导（Edge-Guided）机制与本地-全局注意力网络（Local-Global Attention），显著提升了分割边缘的拟合精度与语义一致性。
+
+本仓库提供了：
+- 完整的训练与推理代码。
+- 边缘引导的局部-全局注意力网络模型实现。
+- 基于 BSDS500 数据集的预处理与评测全流程脚本。
+
+---
+
+## Highlights
+
+- **Edge-Guided Attention**: 利用边缘信息精细化超像素边界。
+- **Local-Global Context**: 同时捕捉局部细节与全局上下文信息。
+- **High Efficiency**: 优化的 PyTorch 实现，结合 Cython 后处理确保连通性。
+- **State-of-the-art Performance**: 在 ASA, CO 和 BR-BP 指标上表现优异。
+
+---
+
+## Project Structure
+
+```text
+.
+├── data_preprocessing/    # BSDS500 数据处理脚本
+├── eval_spixel/           # 评测脚本 (bash & MATLAB)
+├── third_party/           # 外部依赖 (含 Cython 连通性插件)
+├── main.py                # 训练主程序
+├── run_demo.py            # 推理 Demo
+├── requirements.txt       # 环境依赖
+└── LICENSE                # 项目授权协议
+```
+
+---
 
 ## Installation
 
-For install and data preparation, please refer to the guidelines in [MMSegmentation v0.13.0](https://github.com/open-mmlab/mmsegmentation/tree/v0.13.0).
+### 1. Clone the repository
 
-Other requirements:
-```pip install timm==0.3.2```
-
-An example (works for me): ```CUDA 10.1``` and  ```pytorch 1.7.1``` 
-
+```bash
+git clone [https://github.com/iLearn-Lab/ELGANet.git](https://github.com/iLearn-Lab/ELGANet.git)
+cd ELGANet
 ```
-pip install torchvision==0.8.2
-pip install timm==0.3.2
-pip install mmcv-full==1.2.7
-pip install opencv-python==4.5.1.48
-cd SegFormer && pip install -e . --user
+
+### 2. Prerequisites & Cython Compilation
+为了确保超像素的连通性（connectivity），需要编译 `third_party` 中的组件：
+
+```bash
+cd third_party/cython/
+python setup.py install --user
+cd ../..
 ```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Data Preparation 
+
+1. 从 [BSDS500](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_full.tgz) 下载原始数据并解压至 `<BSDS_DIR>`。
+2. 运行预处理脚本生成训练与测试集：
+
+```bash
+cd data_preprocessing
+python pre_process_bsd500.py --dataset=<BSDS_DIR> --dump_root=<DUMP_DIR>
+python pre_process_bsd500_ori_sz.py --dataset=<BSDS_DIR> --dump_root=<DUMP_DIR>
+cd ..
+```
+生成的目录结构包含 `/train`, `/val`, `/test` 文件夹及对应的路径记录 `.txt` 文件。
+
+---
+
+## Usage
+
+### Training
+使用准备好的数据开始训练：
+```bash
+python main.py --data=<DUMP_DIR> --savepath=<CKPT_LOG_DIR>
+```
+
+使用预训练模型进行微调或恢复训练：
+```bash
+python main.py --data=<DUMP_DIR> --savepath=<CKPT_LOG_DIR> --pretrained=<PATH_TO_THE_CKPT> 
+```
+
+### Demo
+对特定目录下的图像生成超像素可视化结果：
+```bash
+python run_demo.py --data_dir=PATH_TO_IMAGE_DIR --output=./demo 
+```
+结果将生成在 `./demo/spixel_viz` 目录下。
+
+---
 
 ## Evaluation
 
-Download `trained weights`. 
-(
-[google drive](https://drive.google.com/drive/folders/1GAku0G0iR9DsBxCbfENWMJ27c5lYUeQA?usp=sharing) | 
-[onedrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/xieenze_connect_hku_hk/Ept_oetyUGFCsZTKiL_90kUBy5jmPV65O5rJInsnRCDWJQ?e=CvGohw)
-)
+遵循 [FCN](https://github.com/fuy34/superpixel_fcn) 的评测流程，使用 [superpixel benchmark](https://github.com/davidstutz/superpixel-benchmark) 进行评估。
 
-Example: evaluate ```SegFormer-B1``` on ```ADE20K```:
+1. 下载并根据 [说明](https://github.com/davidstutz/superpixel-benchmark/blob/master/docs/BUILDING.md) 编译评测代码。
+2. 编辑 `eval_spixel/my_eval.sh` 中的变量（如 `IMG_PATH`, `GT_PATH`, `SEG_PATH`）。
+3. 运行评测 Shell：
+   ```bash
+   cp eval_spixel/my_eval.sh <path/to/benchmark>/examples/bash/
+   cd <path/to/benchmark>/examples/
+   bash my_eval.sh
+   ```
+4. 在 MATLAB 中配置 `plot_benchmark_curve.m` 中的路径并运行，即可查看 **ASA**, **CO**, 和 **BR-BP** 曲线。
 
-```
-# Single-gpu testing
-python tools/test.py local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py /path/to/checkpoint_file
-
-# Multi-gpu testing
-./tools/dist_test.sh local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py /path/to/checkpoint_file <GPU_NUM>
-
-# Multi-gpu, multi-scale testing
-tools/dist_test.sh local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py /path/to/checkpoint_file <GPU_NUM> --aug-test
-```
-
-## Training
-
-Download `weights` 
-(
-[google drive](https://drive.google.com/drive/folders/1b7bwrInTW4VLEm27YawHOAMSMikga2Ia?usp=sharing) | 
-[onedrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/xieenze_connect_hku_hk/EvOn3l1WyM5JpnMQFSEO5b8B7vrHw9kDaJGII-3N9KNhrg?e=cpydzZ)
-) 
-pretrained on ImageNet-1K, and put them in a folder ```pretrained/```.
-
-Example: train ```SegFormer-B1``` on ```ADE20K```:
-
-```
-# Single-gpu training
-python tools/train.py local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py 
-
-# Multi-gpu training
-./tools/dist_train.sh local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py <GPU_NUM>
-```
-
-## Visualize
-
-Here is a demo script to test a single image. More details refer to [MMSegmentation's Doc](https://mmsegmentation.readthedocs.io/en/latest/get_started.html).
-
-```shell
-python demo/image_demo.py ${IMAGE_FILE} ${CONFIG_FILE} ${CHECKPOINT_FILE} [--device ${DEVICE_NAME}] [--palette-thr ${PALETTE}]
-```
-
-Example: visualize ```SegFormer-B1``` on ```CityScapes```: 
-
-```shell
-python demo/image_demo.py demo/demo.png local_configs/segformer/B1/segformer.b1.512x512.ade.160k.py \
-/path/to/checkpoint_file --device cuda:0 --palette cityscapes
-```
-
-
-
-
-
-## License
-Please check the LICENSE file. SegFormer may be used non-commercially, meaning for research or 
-evaluation purposes only. For business inquiries, please visit our website and submit the form: [NVIDIA Research Licensing](https://www.nvidia.com/en-us/research/inquiries/).
-
+---
 
 ## Citation
-```
-@inproceedings{xie2021segformer,
-  title={SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers},
-  author={Xie, Enze and Wang, Wenhai and Yu, Zhiding and Anandkumar, Anima and Alvarez, Jose M and Luo, Ping},
-  booktitle={Neural Information Processing Systems (NeurIPS)},
-  year={2021}
+
+如果您在研究中使用了本代码或方法，请引用我们的工作：
+
+```bibtex
+@ARTICLE{ELGANet,
+  author={Xu, Mingzhu and Sun, Zhengyu and Hu, Yijun and Tang, Haoyu and Hu, Yupeng and Song, Xuemeng and Nie, Liqiang},
+  journal={IEEE Transactions on Circuits and Systems for Video Technology}, 
+  title={Superpixel Segmentation With Edge Guided Local-Global Attention Network}, 
+  year={2025},
+  volume={},
+  number={},
+  pages={1-1},
+  keywords={Image edge detection;Feature extraction;Convolution;Training;Semantics;Object detection;Circuits and systems;Visualization;Data mining;Iterative methods;Superpixel segmentation;Edge enhancement;Local-Global context},
+  doi={10.1109/TCSVT.2025.3587485}
 }
+```
+
+---
+
+## Acknowledgement
+
+- 感谢 [SSN](https://github.com/NVlabs/ssn_superpixels) 提供的组件连接代码。
+- 感谢 [superpixel-benchmark](https://github.com/davidstutz/superpixel-benchmark) 提供的标准评测工具。
+
+---
+
+## License
+
+This project is released under the Apache License 2.0.
 ```
