@@ -1,4 +1,3 @@
-```markdown
 # HFCNet: Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images
 
 > **Official PyTorch implementation of the IEEE TGRS 2024 paper "Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images".**
