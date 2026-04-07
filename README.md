@@ -175,4 +175,3 @@ python main.py --flag test --model_id HFCNet --config config/dataset_orsi.yaml
 ## License
 
 This project is released under the Apache License 2.0.
-```
