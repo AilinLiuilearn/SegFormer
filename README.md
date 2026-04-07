@@ -1,18 +1,19 @@
-# HDNet: A Hybrid Domain Network with Multi-Scale High-Frequency Information Enhancement for Infrared Small Target Detection
+# Superpixel Segmentation With Edge Guided Local-Global Attention Network
 
-> **Official PyTorch implementation of the TGRS 2025 paper "HDNet: A Hybrid Domain Network with Multi-Scale High-Frequency Information Enhancement for Infrared Small Target Detection".**
+> **Official PyTorch implementation of the TCSVT paper "Superpixel Segmentation With Edge Guided Local-Global Attention Network".**
 
 ## Authors
 
-**Mingzhu Xu**<sup>1</sup>, **Chenglong Yu**<sup>1</sup>, **Zexuan Li**<sup>1</sup>, **Haoyu Tang**<sup>1</sup>, **Yupeng Hu**<sup>1</sup>, **Liqiang Nie**<sup>1</sup>\*
+**Mingzhu Xu**<sup>1</sup>, **Zhengyu Sun**<sup>1</sup>, **Yijun Hu**<sup>1</sup>, **Haoyu Tang**<sup>1</sup>, **Yupeng Hu**<sup>1</sup>, **Xuemeng Song**<sup>2</sup>, **Liqiang Nie**<sup>2</sup>
 
 <sup>1</sup> `Shandong University`  
+<sup>2</sup> `Southern University of Science and Technology`  
 \* Corresponding author
 
 ## Links
 
-- **Paper**: [`IEEE Xplore`](https://ieeexplore.ieee.org/document/11017756)
-- **Code Repository**: [`GitHub`](https://github.com/iLearn-Lab/HDNet)
+- **Paper**: [`IEEE Xplore`](https://doi.org/10.1109/TCSVT.2025.3587485)
+- **Code Repository**: [`GitHub`](https://github.com/iLearn-Lab/ELGANet)
 
 ---
 
@@ -21,60 +22,43 @@
 - [Updates](#updates)
 - [Introduction](#introduction)
 - [Highlights](#highlights)
-- [Method / Framework](#method--framework)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
-- [Dataset](#dataset)
+- [Data Preparation](#data-preparation)
 - [Usage](#usage)
-- [Quantitative Results](#quantitative-results)
+- [Evaluation](#evaluation)
+- [Demo / Visualization](#demo--visualization)
 - [Citation](#citation)
-- [Acknowledgement](#acknowledgement)
 - [License](#license)
 
 ---
 
 ## Updates
 
-- [03/2026] Initial release of HDNet training and testing codes.
-- [01/2025] Paper published in IEEE TGRS.
+- [04/2026] Initial release of the official implementation.
+- [01/2025] Paper published in IEEE TCSVT.
 
 ---
 
 ## Introduction
 
-本项目是论文 **"HDNet: A Hybrid Domain Network with Multi-Scale High-Frequency Information Enhancement for Infrared Small Target Detection"** 的官方实现。
+本项目是论文 **"Superpixel Segmentation With Edge Guided Local-Global Attention Network" (ELGANet)** 的官方实现。
 
-HDNet 提出了一种创新的混合域网络，通过融合频域特征与传统的空域 CNN 特征，显著增强了红外弱小目标的对比度并抑制背景干扰：
-- **空域分支**：引入 **多尺度空洞对比卷积 (MAC)** 模块，增强对不同尺寸弱小目标的感知能力。
-- **频域分支**：设计 **动态高通滤波器 (DHPF)** 模块，动态移除低频背景干扰，保留高频目标细节。
-- **实验表现**：在 IRSTD-1K, NUAA-SIRST, NUDT-SIRST 三大数据集上超越了 26 种 SOTA 方法。
+超像素分割是计算机视觉中的基础任务。ELGANet 通过引入边缘引导（Edge-Guided）机制与本地-全局注意力网络（Local-Global Attention），显著提升了分割边缘的拟合精度与语义一致性。
 
-### Example Description
-
-We present **HDNet**, a framework for **Infrared Small Target Detection (IRSTD)**.  
-Our method addresses **background interference and low contrast** by introducing **hybrid domain feature fusion** and **dynamic high-pass filtering**.  
-This repository provides the official implementation, pretrained weights, and evaluation scripts.
+本仓库提供了：
+- 完整的训练与推理代码。
+- 边缘引导的局部-全局注意力网络模型实现。
+- 基于 BSDS500 数据集的预处理与评测全流程脚本。
 
 ---
 
 ## Highlights
 
-- 提出 **Hybrid-Domain Network (HDNet)**，结合空域多尺度感知与频域背景抑制。
-- 创新性 **MAC 模块**，提升小目标与复杂背景的对比度。
-- 创新性 **DHPF 模块**，动态抑制缓慢变化的低频背景噪声。
-- 提供在三大公开数据集上的完整评估结果。
-
----
-
-## Method / Framework
-
-HDNet 架构图展示了空域与频域双分支协作流程。
-
-### Framework Figure
-
-![Framework](./Fig/Structure.png)
-
-**Figure 1.** Overall framework of HDNet.
+- **Edge-Guided Attention**: 利用边缘信息精细化超像素边界。
+- **Local-Global Context**: 同时捕捉局部细节与全局上下文信息。
+- **High Efficiency**: 优化的 PyTorch 实现，结合 Cython 后处理确保连通性。
+- **State-of-the-art Performance**: 在 ASA, CO 和 BR-BP 指标上表现优异。
 
 ---
 
@@ -82,103 +66,121 @@ HDNet 架构图展示了空域与频域双分支协作流程。
 
 ```text
 .
-├── Fig/                   # 架构图及可视化结果
-├── datasets/              # 存放数据集 (IRSTD-1k, NUAA-SIRST, NUDT-SIRST)
-├── weight/                # 存放预训练权重 (.pkl)
-├── main.py                # 主程序入口
-├── README.md
-└── requirements.txt
-````
+├── data_preprocessing/    # BSDS500 数据处理脚本
+├── eval_spixel/           # 评测脚本 (bash & MATLAB)
+├── third_party/           # 外部依赖 (含 Cython 连通性插件)
+├── main.py                # 训练主程序
+├── run_demo.py            # 推理 Demo
+├── requirements.txt       # 环境依赖
+└── LICENSE                # 项目授权协议
+```
 
------
+---
 
 ## Installation
 
-### 1\. Clone the repository
+### 1. Clone the repository
 
 ```bash
-git clone [https://github.com/iLearn-Lab/HDNet.git](https://github.com/iLearn-Lab/HDNet.git)
-cd HDNet
+git clone [https://github.com/iLearn-Lab/ELGANet.git](https://github.com/iLearn-Lab/ELGANet.git)
+cd ELGANet
 ```
 
-### 2\. Prerequisites
+### 2. Prerequisites & Cython Compilation
+为了确保超像素的连通性（connectivity），需要编译 `third_party` 中的组件：
 
-本项目在 Ubuntu 22.04 环境下开发，推荐配置如下：
+```bash
+cd third_party/cython/
+python setup.py install --user
+cd ../..
+```
 
-  - Python 3.10
-  - PyTorch 2.1.0
-  - CUDA 12.1
-
-<!-- end list -->
-
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
------
+---
 
-## Dataset
+## Data Preparation 
 
-请下载以下数据集并放入 `./datasets` 目录：
+1. 从 [BSDS500](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_full.tgz) 下载原始数据并解压至 `<BSDS_DIR>`。
+2. 运行预处理脚本生成训练与测试集：
 
-  - [IRSTD-1k](https://github.com/RuiZhang97/ISNet)
-  - [NUAA-SIRST](https://github.com/YimianDai/sirst)
-  - [NUDT-SIRST](https://github.com/YeRen123455/Infrared-Small-Target-Detection)
+```bash
+cd data_preprocessing
+python pre_process_bsd500.py --dataset=<BSDS_DIR> --dump_root=<DUMP_DIR>
+python pre_process_bsd500_ori_sz.py --dataset=<BSDS_DIR> --dump_root=<DUMP_DIR>
+cd ..
+```
+生成的目录结构包含 `/train`, `/val`, `/test` 文件夹及对应的路径记录 `.txt` 文件。
 
------
+---
 
 ## Usage
 
 ### Training
-
+使用准备好的数据开始训练：
 ```bash
-python main.py --dataset-dir './dataset/IRSTD-1k' --batch-size 4 --epochs 800 --mode 'train'
+python main.py --data=<DUMP_DIR> --savepath=<CKPT_LOG_DIR>
 ```
 
-### Testing
-
+使用预训练模型进行微调或恢复训练：
 ```bash
-python main.py --dataset-dir './dataset/IRSTD-1k' --batch-size 4 --mode 'test' --weight-path './weight/irstd.pkl'
+python main.py --data=<DUMP_DIR> --savepath=<CKPT_LOG_DIR> --pretrained=<PATH_TO_THE_CKPT> 
 ```
 
------
+### Demo
+对特定目录下的图像生成超像素可视化结果：
+```bash
+python run_demo.py --data_dir=PATH_TO_IMAGE_DIR --output=./demo 
+```
+结果将生成在 `./demo/spixel_viz` 目录下。
 
-## Quantitative Results
+---
 
-| Dataset | mIoU (x10⁻²) | Pd (x10⁻²) | Fa (x10⁻⁶) | Weights |
-| :--- | :---: | :---: | :---: | :---: |
-| IRSTD-1k | 70.26 | 94.56 | 4.33 | [Download](https://drive.google.com/file/d/1WjKkkfIRlI7aNlu4xTglmVxwtDqlu4Gu/view?usp=drive_link) |
-| NUAA-SIRST | 79.17 | 100 | 0.53 | [Download](https://drive.google.com/file/d/1GoCaiAEodUop5EPyDWu5LEfJ71D1kOz2/view?usp=drive_link) |
-| NUDT-SIRST | 85.17 | 98.52 | 2.78 | [Download](https://drive.google.com/file/d/1we0dE2L47z509-EW4_Bj4Y828oPSkNAe/view?usp=drive_link) |
+## Evaluation
 
-可视化结果请参考：[HDNet\_Visual\_Result](https://www.google.com/search?q=https://drive.google.drive/folders/1RfoxhoHpjfbRMZHBOvISrJSB5lpoz40t%3Fusp%3Ddrive_link)
+遵循 [FCN](https://github.com/fuy34/superpixel_fcn) 的评测流程，使用 [superpixel benchmark](https://github.com/davidstutz/superpixel-benchmark) 进行评估。
 
------
+1. 下载并根据 [说明](https://github.com/davidstutz/superpixel-benchmark/blob/master/docs/BUILDING.md) 编译评测代码。
+2. 编辑 `eval_spixel/my_eval.sh` 中的变量（如 `IMG_PATH`, `GT_PATH`, `SEG_PATH`）。
+3. 运行评测 Shell：
+   ```bash
+   cp eval_spixel/my_eval.sh <path/to/benchmark>/examples/bash/
+   cd <path/to/benchmark>/examples/
+   bash my_eval.sh
+   ```
+4. 在 MATLAB 中配置 `plot_benchmark_curve.m` 中的路径并运行，即可查看 **ASA**, **CO**, 和 **BR-BP** 曲线。
+
+---
 
 ## Citation
 
-如果您在研究中使用了本代码，请引用我们的论文：
+如果您在研究中使用了本代码或方法，请引用我们的工作：
 
 ```bibtex
-@ARTICLE{11017756,
-  author={Xu, Mingzhu and Yu, Chenglong and Li, Zexuan and Tang, Haoyu and Hu, Yupeng and Nie, Liqiang},
-  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
-  title={HDNet: A Hybrid Domain Network With Multiscale High-Frequency Information Enhancement for Infrared Small-Target Detection}, 
+@ARTICLE{ELGANet,
+  author={Xu, Mingzhu and Sun, Zhengyu and Hu, Yijun and Tang, Haoyu and Hu, Yupeng and Song, Xuemeng and Nie, Liqiang},
+  journal={IEEE Transactions on Circuits and Systems for Video Technology}, 
+  title={Superpixel Segmentation With Edge Guided Local-Global Attention Network}, 
   year={2025},
-  volume={63},
+  volume={},
   number={},
-  pages={1-15},
-  doi={10.1109/TGRS.2025.3574962}
+  pages={1-1},
+  keywords={Image edge detection;Feature extraction;Convolution;Training;Semantics;Object detection;Circuits and systems;Visualization;Data mining;Iterative methods;Superpixel segmentation;Edge enhancement;Local-Global context},
+  doi={10.1109/TCSVT.2025.3587485}
 }
 ```
 
------
+---
 
 ## Acknowledgement
 
-  - HDNet 采用了 SLS 损失函数，并基于 [MSHNet](https://github.com/Lliu666/MSHNet) 进行了架构改进。特别感谢 Qiankun Liu 的工作。
+- 感谢 [SSN](https://github.com/NVlabs/ssn_superpixels) 提供的组件连接代码。
+- 感谢 [superpixel-benchmark](https://github.com/davidstutz/superpixel-benchmark) 提供的标准评测工具。
 
------
+---
 
 ## License
 
