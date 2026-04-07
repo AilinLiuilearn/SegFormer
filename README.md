@@ -1,18 +1,18 @@
-# HFCNet: Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images
+# HDNet: A Hybrid Domain Network with Multi-Scale High-Frequency Information Enhancement for Infrared Small Target Detection
 
-> **Official PyTorch implementation of the IEEE TGRS 2024 paper "Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images".**
+> **Official PyTorch implementation of the TGRS 2025 paper "HDNet: A Hybrid Domain Network with Multi-Scale High-Frequency Information Enhancement for Infrared Small Target Detection".**
 
 ## Authors
 
-**Yutong Liu**<sup>1</sup>, **Mingzhu Xu**<sup>1</sup>, **Tianxiang Xiao**<sup>1</sup>, **Haoyu Tang**<sup>1</sup>, **Yupeng Hu**<sup>1</sup>, **Liqiang Nie**<sup>1</sup>\*
+**Mingzhu Xu**<sup>1</sup>, **Chenglong Yu**<sup>1</sup>, **Zexuan Li**<sup>1</sup>, **Haoyu Tang**<sup>1</sup>, **Yupeng Hu**<sup>1</sup>, **Liqiang Nie**<sup>1</sup>\*
 
-<sup>1</sup> `Affiliation 1`  
+<sup>1</sup> `Shandong University`  
 \* Corresponding author
 
 ## Links
 
-- **Paper**: [`IEEE Xplore`](https://doi.org/10.1109/TGRS.2024.3351234) (Example DOI)
-- **Code Repository**: [`GitHub`](https://github.com/iLearn-Lab/HFCNet)
+- **Paper**: [`IEEE Xplore`](https://ieeexplore.ieee.org/document/11017756)
+- **Code Repository**: [`GitHub`](https://github.com/iLearn-Lab/HDNet)
 
 ---
 
@@ -21,45 +21,60 @@
 - [Updates](#updates)
 - [Introduction](#introduction)
 - [Highlights](#highlights)
+- [Method / Framework](#method--framework)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
-- [Checkpoints / Models](#checkpoints--models)
-- [Dataset / Benchmark](#dataset--benchmark)
+- [Dataset](#dataset)
 - [Usage](#usage)
+- [Quantitative Results](#quantitative-results)
 - [Citation](#citation)
+- [Acknowledgement](#acknowledgement)
 - [License](#license)
 
 ---
 
 ## Updates
 
-- [01/2024] Paper accepted by IEEE TGRS 2024.
-- [01/2024] Initial release of HFCNet training and testing codes.
+- [03/2026] Initial release of HDNet training and testing codes.
+- [01/2025] Paper published in IEEE TGRS.
 
 ---
 
 ## Introduction
 
-本项目是论文 **Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images** 的官方实现。
+本项目是论文 **"HDNet: A Hybrid Domain Network with Multi-Scale High-Frequency Information Enhancement for Infrared Small Target Detection"** 的官方实现。
 
-本项目针对 **光学遥感图像中的显著目标检测 (SOD)** 任务，提出了一种异构特征协作网络 (HFCNet)：
-- **解决问题**：有效协同来自不同骨干网络的异构特征，以应对遥感图像中目标尺度多变和背景复杂的挑战。
-- **核心思想**：通过异构特征协作机制，充分利用 Swin Transformer 的全局建模能力与 VGG 的局部细节提取能力。
-- **本仓库提供**：完整的训练与测试代码、预训练权重接口以及在 ORSSD、EORSSD 和 ORSI-SOD 数据集上的配置。
+HDNet 提出了一种创新的混合域网络，通过融合频域特征与传统的空域 CNN 特征，显著增强了红外弱小目标的对比度并抑制背景干扰：
+- **空域分支**：引入 **多尺度空洞对比卷积 (MAC)** 模块，增强对不同尺寸弱小目标的感知能力。
+- **频域分支**：设计 **动态高通滤波器 (DHPF)** 模块，动态移除低频背景干扰，保留高频目标细节。
+- **实验表现**：在 IRSTD-1K, NUAA-SIRST, NUDT-SIRST 三大数据集上超越了 26 种 SOTA 方法。
 
 ### Example Description
 
-We present **HFCNet**, a framework for **Salient Object Detection in Optical Remote Sensing Images**.  
-Our method addresses **feature heterogeneity** by introducing a **collaboration network** that fuses multi-scale spatial and semantic info.  
-This repository provides the official implementation, trained checkpoints, and evaluation scripts.
+We present **HDNet**, a framework for **Infrared Small Target Detection (IRSTD)**.  
+Our method addresses **background interference and low contrast** by introducing **hybrid domain feature fusion** and **dynamic high-pass filtering**.  
+This repository provides the official implementation, pretrained weights, and evaluation scripts.
 
 ---
 
 ## Highlights
 
-- 支持 **异构特征融合** (Swin Transformer & VGG)。
-- 提供在三个主流遥感显著性检测数据集 (**ORSSD, EORSSD, ORSI-SOD**) 上的完整训练/测试方案。
-- 包含高效的特征协作模块，提升边界检测精度。
+- 提出 **Hybrid-Domain Network (HDNet)**，结合空域多尺度感知与频域背景抑制。
+- 创新性 **MAC 模块**，提升小目标与复杂背景的对比度。
+- 创新性 **DHPF 模块**，动态抑制缓慢变化的低频背景噪声。
+- 提供在三大公开数据集上的完整评估结果。
+
+---
+
+## Method / Framework
+
+HDNet 架构图展示了空域与频域双分支协作流程。
+
+### Framework Figure
+
+![Framework](./Fig/Structure.png)
+
+**Figure 1.** Overall framework of HDNet.
 
 ---
 
@@ -67,110 +82,103 @@ This repository provides the official implementation, trained checkpoints, and e
 
 ```text
 .
-├── config/                # 数据集配置文件 (dataset_o, dataset_e, dataset_orsi)
-├── pretrained/            # 存放初始分类权重 (.pth)
+├── Fig/                   # 架构图及可视化结果
+├── datasets/              # 存放数据集 (IRSTD-1k, NUAA-SIRST, NUDT-SIRST)
+├── weight/                # 存放预训练权重 (.pkl)
 ├── main.py                # 主程序入口
 ├── README.md
 └── requirements.txt
-```
+````
 
----
+-----
 
 ## Installation
 
-### 1. Clone the repository
+### 1\. Clone the repository
 
 ```bash
-git clone [https://github.com/iLearn-Lab/HFCNet.git](https://github.com/iLearn-Lab/HFCNet.git)
-cd HFCNet
+git clone [https://github.com/iLearn-Lab/HDNet.git](https://github.com/iLearn-Lab/HDNet.git)
+cd HDNet
 ```
 
-### 2. Create environment
+### 2\. Prerequisites
 
-```bash
-python -m venv .venv
-source .venv/bin/activate   # Linux / Mac
-```
+本项目在 Ubuntu 22.04 环境下开发，推荐配置如下：
 
-### 3. Install dependencies
+  - Python 3.10
+  - PyTorch 2.1.0
+  - CUDA 12.1
+
+<!-- end list -->
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+-----
 
-## Checkpoints / Models
+## Dataset
 
-### 1. Initialization Weights (for Training)
-请下载以下预训练分类权重并放入 `./pretrained` 目录：
-- **Swin Transformer**: [`swin_base_patch4_window12_384_22k.pth`](https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth)
-- **VGG**: [`vgg16-397923af.pth`](https://download.pytorch.org/models/vgg16-397923af.pth)
+请下载以下数据集并放入 `./datasets` 目录：
 
-### 2. Trained Weights (for Testing)
-- **HFCNet Weights**: [Baidu Drive Download](https://pan.baidu.com/s/1bVC4uxf3xKhLRcC08EQKMQ?pwd=hfcn) (Password: `hfcn`)
+  - [IRSTD-1k](https://github.com/RuiZhang97/ISNet)
+  - [NUAA-SIRST](https://github.com/YimianDai/sirst)
+  - [NUDT-SIRST](https://github.com/YeRen123455/Infrared-Small-Target-Detection)
 
----
-
-## Dataset / Benchmark
-
-请下载数据集并生成对应的路径列表文件 (`.txt`)。支持的数据集包括：
-- **ORSSD**
-- **EORSSD**
-- **ORSI-SOD**
-
----
+-----
 
 ## Usage
 
 ### Training
-使用 `nohup` 在后台开始训练：
+
 ```bash
-# ORSSD
-nohup python -u main.py --flag train --model_id HFCNet --config config/dataset_o.yaml --device cuda:0 > train_ORSSD.log &
-
-# EORSSD
-nohup python -u main.py --flag train --model_id HFCNet --config config/dataset_e.yaml --device cuda:0 > train_EORSSD.log &
-
-# ORSI-SOD
-nohup python -u main.py --flag train --model_id HFCNet --config config/dataset_orsi.yaml --device cuda:0 > train_ORSI.log &
+python main.py --dataset-dir './dataset/IRSTD-1k' --batch-size 4 --epochs 800 --mode 'train'
 ```
 
 ### Testing
-下载训练好的权重，创建目录并运行测试脚本：
+
 ```bash
-# ORSSD
-mkdir ./modelPTH-ORSSD
-python main.py --flag test --model_id HFCNet --config config/dataset_o.yaml
-
-# EORSSD
-mkdir ./modelPTH-EORSSD
-python main.py --flag test --model_id HFCNet --config config/dataset_e.yaml 
-
-# ORSI-SOD
-mkdir ./modelPTH-ORSI
-python main.py --flag test --model_id HFCNet --config config/dataset_orsi.yaml
+python main.py --dataset-dir './dataset/IRSTD-1k' --batch-size 4 --mode 'test' --weight-path './weight/irstd.pkl'
 ```
 
----
+-----
+
+## Quantitative Results
+
+| Dataset | mIoU (x10⁻²) | Pd (x10⁻²) | Fa (x10⁻⁶) | Weights |
+| :--- | :---: | :---: | :---: | :---: |
+| IRSTD-1k | 70.26 | 94.56 | 4.33 | [Download](https://drive.google.com/file/d/1WjKkkfIRlI7aNlu4xTglmVxwtDqlu4Gu/view?usp=drive_link) |
+| NUAA-SIRST | 79.17 | 100 | 0.53 | [Download](https://drive.google.com/file/d/1GoCaiAEodUop5EPyDWu5LEfJ71D1kOz2/view?usp=drive_link) |
+| NUDT-SIRST | 85.17 | 98.52 | 2.78 | [Download](https://drive.google.com/file/d/1we0dE2L47z509-EW4_Bj4Y828oPSkNAe/view?usp=drive_link) |
+
+可视化结果请参考：[HDNet\_Visual\_Result](https://www.google.com/search?q=https://drive.google.drive/folders/1RfoxhoHpjfbRMZHBOvISrJSB5lpoz40t%3Fusp%3Ddrive_link)
+
+-----
 
 ## Citation
 
-如果您在研究中使用了本工作，请引用：
+如果您在研究中使用了本代码，请引用我们的论文：
 
 ```bibtex
-@ARTICLE{HFCNet,
-  author={Liu, Yutong and Xu, Mingzhu and Xiao, Tianxiang and Tang, Haoyu and Hu, Yupeng and Nie, Liqiang},
+@ARTICLE{11017756,
+  author={Xu, Mingzhu and Yu, Chenglong and Li, Zexuan and Tang, Haoyu and Hu, Yupeng and Nie, Liqiang},
   journal={IEEE Transactions on Geoscience and Remote Sensing}, 
-  title={Heterogeneous Feature Collaboration Network for Salient Object Detection in Optical Remote Sensing Images}, 
-  year={2024},
-  volume={62},
+  title={HDNet: A Hybrid Domain Network With Multiscale High-Frequency Information Enhancement for Infrared Small-Target Detection}, 
+  year={2025},
+  volume={63},
   number={},
-  pages={1-14},
-  doi={10.1109/TGRS.2024.3351234}}
+  pages={1-15},
+  doi={10.1109/TGRS.2025.3574962}
+}
 ```
 
----
+-----
+
+## Acknowledgement
+
+  - HDNet 采用了 SLS 损失函数，并基于 [MSHNet](https://github.com/Lliu666/MSHNet) 进行了架构改进。特别感谢 Qiankun Liu 的工作。
+
+-----
 
 ## License
 
